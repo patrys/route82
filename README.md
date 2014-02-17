@@ -14,7 +14,6 @@ def about_view(request):
 def product_details_view(request, product_id):
     return 'Product: %s' % (product_id,)
 
-
 router = Router([
     Resource('about', about_view),
     Resource('products', Router([

@@ -27,11 +27,49 @@ router = Router([
         Resource(':product_id', product_details_view, name='product-details')])])
 
 router.resolve('/about')
-# Route(handler=<function about_view ...>, path=u'/about', kwargs={}, parent=Route(handler=<route82.Router object ...>, path=u'', kwargs={}, parent=None))
-
-router.resolve('/products/11')
-# Route(handler=<function product_details_view ...>, path=u'/products/11', kwargs={'product_id': u'11'}, parent=Route(handler=<route82.Router object ...>, path=u'/products', kwargs={}, parent=Route(handler=<route82.Router object ...>, path=u'', kwargs={}, parent=None)))
+# Route(handler=<function about_view ...>, path=u'/about', kwargs={},
+#   parent=Route(handler=<route82.Router object ...>, path=u'', kwargs={}, parent=None))
 
 request(router, '/products/25')
 # 'Product: 25'
+
+router.reverse('product-details', product_id='foo')
+# '/products/foo'
+```
+
+It supports relative reversing that make namespacing simple:
+
+```python
+from route82 import Resource, Router
+
+router = Router([
+    (':language', [
+        Resource('about', lambda request, language: 'Hello from %s' % (language,)),
+        Resource('catalogue', lambda request, language: 'Our products in %s' % (language,),
+                 name='catalogue')])])
+
+route = router.resolve('/en-gb/about')
+route.reverse('catalogue')
+# '/en-gb/catalogue'
+route.reverse('catalogue', language='it')
+# '/it/catalogue'
+```
+
+All wrapped in a nice request object:
+
+```python
+from route82 import Resource, Router, request
+
+
+def simple_view(request):
+    return 'This is %s, go see %s' % (
+        request.path,
+        request.reverse('other-view'))
+
+router = Router([
+    ('foo', simple_view),
+    Resource('bar', lambda request: 'Woo', name='other-view')])
+
+request(router, '/foo')
+# 'This is /foo, go see /bar'
 ```
